@@ -119,7 +119,7 @@ export const RecipeModule = (function() {
             // BROWSER - PERF TESTS --------------------
             t0 = performance.now();
             // -----------------------------------------
-            
+            console.log('searchterm= ', currentSearchTerm);
             search(recipes, currentSearchTerm); // launch search for term in recipes list
         }
     }
