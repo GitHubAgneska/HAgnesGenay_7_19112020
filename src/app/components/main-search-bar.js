@@ -25,11 +25,11 @@ export class SearchBar extends HTMLElement {
             </div>`;
 
         const mainInputSearch = this.querySelector('#main-search-input');
+        
         let searchIcon = this.querySelector('#search-addon');
         searchIcon.classList.add('d-inline-block');
         let resetSearchIcon = this.querySelector('#reset-search-icon');
         resetSearchIcon.style.display = 'none'; // default
-
         resetSearchIcon.addEventListener('click', function(event) { RecipeModule.resetSearch(event); });
 
         // prepare a wrapper for incoming suggestions: it will be empty and non visible until items come in
@@ -57,9 +57,14 @@ export class SearchBar extends HTMLElement {
             currentSearchTerm = event.target.value;
             if ( event.key === 'Backspace') {
                 handleManualSearchReset();
-                return false; // prevent more search
+                return; // prevent more search ----- works ?
             }
-            if ( event.key === 'Enter' ) { RecipeModule.confirmCurrentChars(); } // allow manual searchterm confirmation
+            if ( event.key === 'Enter' ) { // allow manual searchterm confirmation
+                RecipeModule.confirmCurrentChars();
+                searchIcon.classList.remove('d-inline-block'); 
+                searchIcon.style.display = 'none';
+                resetSearchIcon.style.display = 'inline-block'; // visible
+            } 
         }, false);
 
 
@@ -80,7 +85,8 @@ export class SearchBar extends HTMLElement {
             currentSearchTerm = mainInputSearch.value;
             RecipeModule.confirmCurrentChars();
             // reset search icon replaces serach icon
-            searchIcon.classList.remove('d-inline-block'); searchIcon.style.display = 'none';
+            searchIcon.classList.remove('d-inline-block'); 
+            searchIcon.style.display = 'none';
             resetSearchIcon.style.display = 'inline-block'; // visible
         }, false);
     }
