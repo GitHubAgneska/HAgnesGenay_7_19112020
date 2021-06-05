@@ -130,7 +130,7 @@ export const RecipeModule = (function() {
     let storedSuggestedResults;
     let setSuggestedResults = function( suggestedResults) { storedSuggestedResults = suggestedResults; };
     let getSuggestedResults = function() { return storedSuggestedResults; };
-    let resetSuggestedResults = function() { return storedSuggestedResults = []; };
+    let resetSuggestedResults = function() { storedSuggestedResults = []; };
 
     function resetAllFromPreviousSearch() {
         resetSuggestions(); resetResults(); resetSuggestedResults();
@@ -265,12 +265,12 @@ export const RecipeModule = (function() {
     }
 
     // case where user presses 'enter' in search bar 
-    // -> if searchterm is partial => will display all recipes linked to all suggested words
-    // 
+    // -> if searchterm is partial => will display all recipes linked to all suggested words ------ TO REVIEW : will do the samr if word is complete..
     function confirmCurrentChars(event) {
         let suggested = getSuggestedResults();
-        setResults(suggested);
-        displaySearchResults(suggested);
+        let results = getResults();
+        setResults(results);
+        displaySearchResults(results);
         resetSuggestionsBlock(); //UI
         resetSuggestions(); // reset suggestions data
     }
