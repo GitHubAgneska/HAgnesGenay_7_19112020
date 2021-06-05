@@ -64,7 +64,7 @@ export class SearchBar extends HTMLElement {
                 searchIcon.classList.remove('d-inline-block'); 
                 searchIcon.style.display = 'none';
                 resetSearchIcon.style.display = 'inline-block'; // visible
-            } 
+            }
         }, false);
 
 

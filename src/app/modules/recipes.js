@@ -249,7 +249,7 @@ export const RecipeModule = (function() {
             return;
         } 
     }
-
+    
     function selectSuggestedWord(event, suggestedRecipes) {
         let word = event.target.innerText; // text inside <p> element where event occurs
         let inputField = document.querySelector('#main-search-input');
@@ -258,10 +258,16 @@ export const RecipeModule = (function() {
         // order display of list results for this word
         setResults(suggestedRecipes);
         displaySearchResults(suggestedRecipes);
-
+        
         // reset / close suggestion list
         resetSuggestionsBlock(); //UI
         resetSuggestions(); // reset suggestions data
+        
+        let searchIcon = document.querySelector('#search-addon');
+        let resetSearchIcon = document.querySelector('#reset-search-icon');
+        searchIcon.classList.remove('d-inline-block'); 
+        searchIcon.style.display = 'none';
+        resetSearchIcon.style.display = 'inline-block'; // visible
     }
 
     // case where user presses 'enter' in search bar 
