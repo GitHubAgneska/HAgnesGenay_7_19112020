@@ -148,7 +148,7 @@ export const RecipeModule = (function() {
         resetAllFromPreviousSearch();
 
         // launch search in trie if 3 chars
-        // reset for every new char 
+        // repeat for every new char 
         if ( currentSearchTerm.length >= 3 ) {
 
             // BROWSER - PERF TESTS --------------------
@@ -202,7 +202,7 @@ export const RecipeModule = (function() {
     let allValuesOfCurrentSuggestions = []; // and their linked recipes ( to remove doublons if needed )
     
     function processTrieSuggestions(suggestions) {
-        resetSuggestionsBlock(); // reset dom sugg block
+
         allKeysOfCurrentSuggestions = []; // reset arr of sugg words
 
         suggestions.forEach( map => { // each newly incoming sugg from trie
