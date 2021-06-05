@@ -266,11 +266,16 @@ export const RecipeModule = (function() {
 
     // case where user presses 'enter' in search bar 
     // -> if searchterm is partial => will display all recipes linked to all suggested words ------ TO REVIEW : will do the samr if word is complete..
-    function confirmCurrentChars(event) {
+    function confirmCurrentChars() {
         let suggested = getSuggestedResults();
         let results = getResults();
-        setResults(results);
-        displaySearchResults(results);
+        if ( !results ) { 
+            setResults(suggested);
+            displaySearchResults(suggested);
+        } else { 
+            setResults(results);
+            displaySearchResults(results);
+        }
         resetSuggestionsBlock(); //UI
         resetSuggestions(); // reset suggestions data
     }
