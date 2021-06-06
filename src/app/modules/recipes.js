@@ -156,7 +156,7 @@ export const RecipeModule = (function() {
         
         // check if search in categories was done before main search
         // in which case, the main search will operate on a trie of these existing results
-        let advRes = getAdvancedSearchResults();
+        let advRes = getAdvancedSearchResults() || [];
         // console.log('ADVANCED SEARCH RESULTS===',advRes );
 
         // launch search in trie if 3 chars 
@@ -166,7 +166,7 @@ export const RecipeModule = (function() {
             t0 = performance.now();
             // -----------------------------------------
             
-            if ( Array.isArray(advRes) || advRes.length ) { // if some results from advanced search exist
+            if ( advRes.length ) { // if some results from advanced search exist
                 
                 searchInPartialTree(currentSearchTerm);
                 let resultsFromPartialTrie = getPartialTrieResults(); // console.log('RESULTS FROM TRIE==', resultsFromTrie);
@@ -342,6 +342,11 @@ export const RecipeModule = (function() {
         displaySearchResults(allrecipes);
     }
 
+    // case where results from adv search exist, and user resets main search input field
+    function resetToAdvSearchResults() {
+
+    }
+
     // DISPLAY RECIPE LIST BY SEARCH TERM ----------------
     // when an array of results for the search term is ready to be displayed in UI
         // 'ready' means: a suggestion has been selected
@@ -487,22 +492,33 @@ export const RecipeModule = (function() {
             listELement.addEventListener('click', function(event){ selectItemInList(event, categoryName); }, false);
         });
     }
+
+    // HANDLING resetting of main search / adv search when depending on each other
+    let mainInputSearchIsActive = () => {
+        const mainInputSearch = document.querySelector('#main-search-input');
+        if ( mainInputSearch.value ) { return true; } else { return false; }
+    };
+    
+    let advSearchIsActive = () => {
+        const tagsWrapper = document.querySelector('#tagsWrapper');
+        if ( !tagsWrapper.hasChildNodes() ) { return true; } else { return false; }
+    };
+    
     // case where all tags have been removed from advanced search :
     // IF there was a main search => reset displaying main search results
     // ELSE => reset default view
-    let mainInputSearchActive;
     function handleAdvancedSearchReset() {
-        const mainInputSearch = document.querySelector('#main-search-input');
-        
-        if ( mainInputSearch.value ) { 
-            mainInputSearchActive = true;
-            processCurrentMainSearch(mainInputSearch.value);
-
-        } else { 
-            mainInputSearchActive = false;
-            resetDefaultView();
-        }
+        if ( mainInputSearchIsActive() )  {
+            let currentVal = document.querySelector('#main-search-input').value;
+            processCurrentMainSearch(currentVal);
+        } else {  resetDefaultView(); }
     }
+
+    function resetToAdvSearchResults() {
+        let res = getAdvancedSearchResults();
+        displaySearchResults(res);
+    }
+
 
 
     //  ======== !! TO REVIEW : REDEFINITION OF EXISTING METHOD in CollapsingMenu component : 
@@ -565,6 +581,7 @@ export const RecipeModule = (function() {
         displaySearchResults: displaySearchResults,
         processAdvancedSearch: processAdvancedSearch,
         handleAdvancedSearchReset:handleAdvancedSearchReset,
+        resetToAdvSearchResults:resetToAdvSearchResults,
         checkWhosOpen:checkWhosOpen,
         displayNoResults:displayNoResults,
         };

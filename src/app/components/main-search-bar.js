@@ -30,7 +30,23 @@ export class SearchBar extends HTMLElement {
         searchIcon.classList.add('d-inline-block');
         let resetSearchIcon = this.querySelector('#reset-search-icon');
         resetSearchIcon.style.display = 'none'; // default
-        resetSearchIcon.addEventListener('click', function(event) { RecipeModule.resetSearch(event); });
+
+        let advSearchIsActive = () => {
+            const tagsWrapper = document.querySelector('#tagsWrapper');
+            if ( tagsWrapper && tagsWrapper.hasChildNodes() ) { return true; } else { return false; }
+        };
+
+        resetSearchIcon.addEventListener('click', function(event) { 
+            if ( advSearchIsActive() ) {
+                resetInput(event);
+            } else { RecipeModule.resetSearch();}
+        });
+
+        function resetInput(event) {
+
+            mainInputSearch.value = event.target;
+            return mainInputSearch.value = '';
+        }
 
         // prepare a wrapper for incoming suggestions: it will be empty and non visible until items come in
         const suggestionsWrapperParent = this.querySelector('.form-outline');
@@ -67,14 +83,20 @@ export class SearchBar extends HTMLElement {
             }
         }, false);
 
-
+;
         // case where user deletes chars until field = empty or deletes the whole searchterm
         // when input has been touched + searchterm is empty + focus still on input
         function handleManualSearchReset(){
             if ( inputFieldTouched && !currentSearchTerm && mainInputSearch == document.activeElement ){
                 console.log('NEW SEARCH PENDING');
-                RecipeModule.resetAllForNewSearch();
-                RecipeModule.resetDefaultView();
+
+                // if adv search not active : reset all to default all recipes view
+                if ( !advSearchIsActive()) {
+                    RecipeModule.resetAllForNewSearch();
+                    RecipeModule.resetDefaultView();
+                } else { // adv search IS active : reset view to these results
+                    RecipeModule.resetToAdvSearchResults();
+                }
             }
         }
         
