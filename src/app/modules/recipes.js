@@ -403,21 +403,21 @@ export const RecipeModule = (function() {
             const recipeIngr = recipe.ingredients;
             recipeIngr.forEach( item => {
                 let currentIngredient = item.ingredient;
-                checkString(currentIngredient); // remove ponctuation, accents, make lowercase
+                currentIngredient = checkString(currentIngredient); // remove ponctuation, accents, make lowercase
                 treatUnits(item); // checkUnitType(item); ---- to review : exceptions !
                 checkDoublonsBeforeAddingToArray(ingredientsList,currentIngredient);
             });
 
             // retrieve category elements : all appliances
             let currentAppliance = recipe.appliance;
-            checkString(currentAppliance);
+            currentAppliance = checkString(currentAppliance);
             checkDoublonsBeforeAddingToArray(appliancesList,currentAppliance);
 
             // retrieve category elements : all ustensils
             const recipeUst = recipe.ustensils;
             recipeUst.forEach(ust => {
                 let currentUstensil = ust;
-                checkString(currentUstensil);
+                currentUstensil = checkString(currentUstensil);
                 checkDoublonsBeforeAddingToArray(ustensilsList,currentUstensil);
             });
         });
