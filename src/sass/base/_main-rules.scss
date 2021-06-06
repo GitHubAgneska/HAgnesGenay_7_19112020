@@ -35,7 +35,7 @@ body {
 a { text-decoration: none; color: unset; }
 input { border: transparent; }
 ul { margin: 0; padding: 0;}
-ul li { list-style: none; }
+ul li { list-style: none !important; }
 button { display: block; border: none; }
 
 a, input, button {cursor: pointer; }

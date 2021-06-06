@@ -225,10 +225,11 @@ export class CollapsingMenu extends HTMLElement{
             currentSuggestions = searchIntoCurrentList(searchTerm, currentCategoryName, currentItems);
             console.log('currentSuggestions==', currentSuggestions);
 
-            displayCurrentSuggestions(currentSuggestions);       
+            displayCurrentSuggestions(currentSuggestions);
         }
 
         function displayCurrentSuggestions(currentSuggestions) {
+            resetSuggestions();  
             // first, hide the whole current list
             cardBodyList.style.display = 'none';
             // suggestions wrapper becomes visible
@@ -272,12 +273,12 @@ export class CollapsingMenu extends HTMLElement{
         
         let removeTagFromList = function(tag) {
             
-            let currenttags = getTagsList();
-            console.log('currenttags==', currenttags);
+            // let currenttags = getTagsList();
+            // console.log('currenttags==', currenttags);  
 
             let tagIndex = currentTags.indexOf(tag);
             currentTags.splice(tagIndex, 1);
-            console.log('currenttags AFTER REMOVE==', currentTags, 'type==', typeof(currentTags));
+            // console.log('currenttags AFTER REMOVE==', currentTags, 'type==', typeof(currentTags));
             return currentTags;
         };
 
@@ -304,7 +305,7 @@ export class CollapsingMenu extends HTMLElement{
 
             const containsParenthesesRegex = /\((.*)\)/;
             if ( containsParenthesesRegex.test(searchTerm) ){ // ---------- to review -- used in 1 or 2 cases only
-                console.log('contains parentheses');
+                // console.log('contains parentheses');
                 removePunctuation(searchTerm);
             }
             let tagText = document.createTextNode(searchTerm);
