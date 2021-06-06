@@ -7,7 +7,7 @@ import {CardTemplate} from '../components/bootstrap-card';
 import {HeaderBaseTemplate} from '../components/header';
 
 import {treatUnits, checkDoublonsBeforeAddingToArray, checkString} from '../utils/process-api-data';
-import {mapDataToTree, searchInTree, getTrieResults, getTrieSuggestions} from '../utils/trie-search4';
+import {mapDataToTree, searchInTree, getTrieResults, getTrieSuggestions, searchInPartialTree, getPartialTrieResults, getPartialTrieSuggestions} from '../utils/trie-search4';
 import {advancedSearch} from '../utils/search-algo';
 
 
@@ -91,7 +91,7 @@ export const RecipeModule = (function() {
         myStorage.setItem('allRecipes',JSON.stringify(recipesList));
 
         // ADD ALL DATA TO TREE 
-        mapDataToTree(recipes);
+        mapDataToTree(recipes, false);
 
         setResults(recipesList);
         initAdvancedSearchSection();
@@ -116,6 +116,9 @@ export const RecipeModule = (function() {
 
     let advancedSearchRecipes = [];
     let advancedSearchResults = [];
+    let setAdvancedSearchResults = function(results) { advancedSearchResults = results; };
+    let getAdvancedSearchResults = function() { return advancedSearchResults; };
+
     // STORE results in the module, until display method needs them
     let setResults = function(results) { storedResults = results; };
     let resetResults = function() { storedResults = []; };
@@ -132,42 +135,67 @@ export const RecipeModule = (function() {
     let getSuggestedResults = function() { return storedSuggestedResults; };
     let resetSuggestedResults = function() { storedSuggestedResults = []; };
 
-    function resetAllFromPreviousSearch() {
-        resetSuggestions(); resetResults(); resetSuggestedResults();
-    }
+    // STORE current searchterm
+    // used for the case where input has been emptied, then same word searched again : should display suggestions again
+    let currentSearchTerm = '';
+    let setCurrentSearchterm = function(term) { currentSearchTerm = term; };
+    let getCurrentSearchterm = function() { return currentSearchTerm; };
+
+    function resetAllFromPreviousSearch() { resetSuggestions(); resetResults(); resetSuggestedResults();  }
     
     // BROWSER PERF TESTS --------------------------------------------------
     let t0, t1;
     // ---------------------------------------------------------------------
-    let currentSearchTerm = '';
 
     // RETRIEVE current search term and call search method --------
     function processCurrentMainSearch(letter) {
+
         // console.log('letter===', letter);
         currentSearchTerm += letter;
         resetAllFromPreviousSearch();
+        
+        // check if search in categories was done before main search
+        // in which case, the main search will operate on a trie of these existing results
+        let advRes = getAdvancedSearchResults();
+        // console.log('ADVANCED SEARCH RESULTS===',advRes );
 
-        // launch search in trie if 3 chars
-        // repeat for every new char 
+        // launch search in trie if 3 chars 
         if ( currentSearchTerm.length >= 3 ) {
-
+            
             // BROWSER - PERF TESTS --------------------
             t0 = performance.now();
             // -----------------------------------------
+            
+            if ( Array.isArray(advRes) || advRes.length ) { // if some results from advanced search exist
+                
+                searchInPartialTree(currentSearchTerm);
+                let resultsFromPartialTrie = getPartialTrieResults(); // console.log('RESULTS FROM TRIE==', resultsFromTrie);
+                let suggestionsFromPartialTrie = getPartialTrieSuggestions(); // console.log('SUGGESTIONS FROM TRIE==', suggestionsFromTrie);
+                if ( suggestionsFromPartialTrie ) {
+                    processTrieSuggestions(suggestionsFromPartialTrie);
+                    if ( resultsFromPartialTrie ) { processTrieResults(resultsFromPartialTrie); }
+                }
+                else {  // current chars did not produce matches
+                    displayNoResults();
+                }
 
-            searchInTree(currentSearchTerm); // launch search in trie
-            
-            let resultsFromTrie = getTrieResults(); // console.log('RESULTS FROM TRIE==', resultsFromTrie);
-            let suggestionsFromTrie = getTrieSuggestions(); // console.log('SUGGESTIONS FROM TRIE==', suggestionsFromTrie);
-            
-            if ( suggestionsFromTrie ) {
-                processTrieSuggestions(suggestionsFromTrie);
-                if ( resultsFromTrie ) { processTrieResults(resultsFromTrie); }
+            } else {  // NO results from advanced search exist
+    
+                searchInTree(currentSearchTerm); // launch search in trie
+                let resultsFromTrie = getTrieResults(); // console.log('RESULTS FROM TRIE==', resultsFromTrie);
+                let suggestionsFromTrie = getTrieSuggestions(); // console.log('SUGGESTIONS FROM TRIE==', suggestionsFromTrie);
+                
+                if ( suggestionsFromTrie ) {
+                    processTrieSuggestions(suggestionsFromTrie);
+                    if ( resultsFromTrie ) { processTrieResults(resultsFromTrie); }
+                }
+                else {  // current chars did not produce matches
+                    displayNoResults();
+                }
             }
-            else {  // current chars did not produce matches
-                displayNoResults();
-            }
+            
         }
+        setCurrentSearchterm(currentSearchTerm); // used for the case where input has been emptied, then same word searched again : should display suggestions again
         currentSearchTerm = '';
     }
 
@@ -186,7 +214,7 @@ export const RecipeModule = (function() {
             }
         });
         setResults(finalArrOfRecipes); // store results array
-        console.log('RECIPES ARRAY AS RECEIVED BY MODULE====',finalArrOfRecipes );
+        if ( finalArrOfRecipes.length > 0 ) console.log('RECIPES ARRAY AS RECEIVED BY MODULE====',finalArrOfRecipes );
         
         // BROWSER - PERF TESTS --------------------
         t1 = performance.now();
@@ -247,7 +275,7 @@ export const RecipeModule = (function() {
         } else { // word already is suggestions list
             /// console.log('WORD IS IN LIST ALREADY!');
             return;
-        } 
+        }
     }
     
     function selectSuggestedWord(event, suggestedRecipes) {
@@ -496,8 +524,11 @@ export const RecipeModule = (function() {
         //console.log('currentListofResults IS ====', advancedSearchRecipes);
         advancedSearch(advancedSearchRecipes, searchTerm, currentCategoryName);
         advancedSearchResults = RecipeModule.getResults();
+        // store advanced search results 
+        setAdvancedSearchResults(advancedSearchResults);
+        // ADD partial DATA TO A TREE 
+        mapDataToTree(advancedSearchResults, true);
         displaySearchResults(advancedSearchResults);
-
     }
 
     // method used to close a menu if another one is called to open
