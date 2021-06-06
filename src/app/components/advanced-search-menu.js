@@ -167,6 +167,10 @@ export class CollapsingMenu extends HTMLElement{
         function handleSelectItemInput(event) {
             searchTerm = event.target.value;
             searchInputField = event.target;
+            // if several words term, make all spaces to '-' ( as set up in trie) ---- ! trie search is NOT implemented in advanced search
+            // let noApostropheNoSpace = searchTerm.replace(/[']|\s/g, '-');
+            // console.log('SEARCHTERM WHEN SELECT LIST ITEM===', noApostropheNoSpace)
+
             // retrieve current category from input id  ( ex '#searchInto-ingredients')
             let currentCategoryName = searchInputField.getAttribute('id');
             currentCategoryName = currentCategoryName.slice(11, currentCategoryName.length);

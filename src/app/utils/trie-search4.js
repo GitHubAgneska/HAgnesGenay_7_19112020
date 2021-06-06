@@ -288,7 +288,7 @@ export function mapDataToTree(recipes) {
         });
         // console.log('recipesTrie root=', recipesTrie.root);
     });
-    // console.log('TRIE PRINT===',recipesTrie.print());
+    console.log('TRIE PRINT===',recipesTrie.print());
     setCurrentTrie(recipesTrie);
     return recipesTrie;
 }
