@@ -326,6 +326,7 @@ function getCurrentPartialTrie() { return currentPartialTrie; }
 
 export function searchInPartialTree(searchTerm) {
     let recipesPartialTrie = getCurrentPartialTrie();
+    console.log('PARTIAL TRIE==', recipesPartialTrie);
     recipesPartialTrie.searchElementInTrie(searchTerm);
 }
 
