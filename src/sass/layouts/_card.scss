@@ -4,7 +4,7 @@
 card-component {
     margin: 1% 0;
     display: flex;
-
+    
     .col { @include min-992px { }}
 
     .card.recipe-card {

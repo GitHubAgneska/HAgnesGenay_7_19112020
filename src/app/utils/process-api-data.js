@@ -128,7 +128,8 @@ export function treatUnits(ingredientObject) {
     }
     return ingredientObject;
 }
-// method that checks on ingredients 'quantity' and 'unit'
+
+// method that checks on ingredients 'quantity' and 'unit'  ------- TO DO
 // so ingredients list displays proper spelling:
 // ex: ALL quantifiable ingredients = plural form : if  there's NO 'UNITS' :  then ingredient must be of plural form ('S') : 'quantity' : 2 =>  'ingredient' : 'citronS'
 // + inverse : ex: if 'quantity' === 1 , then unit should not take a 'S' -  ex: "quantity": 1,  "unit": "cuillère à soupe" 
@@ -143,6 +144,6 @@ export function checkUnitType(ingredientObject) {
     // first, check if object contains a 'unit' key
     if ( !objectHasUnitProp && !endsWithS ) { ingredientObject.ingredient = ingredientName.concat('S'); }
 
-    console.log('ingredientObject corrected==', ingredientName);
+    // console.log('ingredientObject corrected==', ingredientName);
     return ingredientObject;
 }
