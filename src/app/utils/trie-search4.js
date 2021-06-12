@@ -184,7 +184,7 @@ class Trie {
                         lastMatchingNode = node;
                         suggestions = this.goToLastNode(lastMatchingNode); // inspect different endings: 'coco' => should get 'cocotte'
                         this.setTrieSuggestions(suggestions);
-                        // console.log('SUGGESTIONS WOULD BE ===', suggestions);
+                        console.log('SUGGESTIONS WOULD BE ===', suggestions);
                     }
                 }
                 else { return;  }

@@ -43,7 +43,6 @@ export class SearchBar extends HTMLElement {
         });
 
         function resetInput(event) {
-
             mainInputSearch.value = event.target;
             return mainInputSearch.value = '';
         }

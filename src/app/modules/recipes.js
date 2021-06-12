@@ -114,12 +114,13 @@ export const RecipeModule = (function() {
     let storedResults = [];  // local storage of results
     let storedSuggestions = []; // local storage of suggestions
 
+    // STORE results of adv search
     let advancedSearchRecipes = [];
     let advancedSearchResults = [];
     let setAdvancedSearchResults = function(results) { advancedSearchResults = results; };
     let getAdvancedSearchResults = function() { return advancedSearchResults; };
 
-    // STORE results in the module, until display method needs them
+    // STORE results of main search
     let setResults = function(results) { storedResults = results; };
     let resetResults = function() { storedResults = []; };
     let getResults = function() { return storedResults; };
@@ -183,7 +184,7 @@ export const RecipeModule = (function() {
     
                 searchInTree(currentSearchTerm); // launch search in trie
                 let resultsFromTrie = getTrieResults(); // console.log('RESULTS FROM TRIE==', resultsFromTrie);
-                let suggestionsFromTrie = getTrieSuggestions(); // console.log('SUGGESTIONS FROM TRIE==', suggestionsFromTrie);
+                let suggestionsFromTrie = getTrieSuggestions(); console.log('SUGGESTIONS FROM TRIE==', suggestionsFromTrie);
                 
                 if ( suggestionsFromTrie ) {
                     processTrieSuggestions(suggestionsFromTrie);
@@ -193,7 +194,6 @@ export const RecipeModule = (function() {
                     displayNoResults();
                 }
             }
-            
         }
         setCurrentSearchterm(currentSearchTerm); // used for the case where input has been emptied, then same word searched again : should display suggestions again
         currentSearchTerm = '';
@@ -304,8 +304,8 @@ export const RecipeModule = (function() {
     function confirmCurrentChars() {
         let suggested = getSuggestedResults();
         let results = getResults();
-        if ( !results ) { 
-            setResults(suggested);
+        if ( results.length === 0 ) {
+            setResults(suggested); 
             displaySearchResults(suggested);
         } else { 
             setResults(results);
@@ -344,7 +344,6 @@ export const RecipeModule = (function() {
     }
 
     // case where results from adv search exist, and user resets main search input field
- 
 
     // DISPLAY RECIPE LIST BY SEARCH TERM ----------------
     // when an array of results for the search term is ready to be displayed in UI
@@ -384,7 +383,7 @@ export const RecipeModule = (function() {
         if (root.contains(noResultsBlock)) { root.removeChild(noResultsBlock);}
     }
 
-    function resetAllForNewSearch() {
+    function resetAllForNewSearch() {  // ---- TO REVIEW : doublon of resetAllFromPrevSearch
         resetResults();
         resetSuggestions();
         resetSuggestionsBlock();
