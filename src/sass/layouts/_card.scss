@@ -40,7 +40,10 @@ card-component {
         }
         .recipe-description {
             height: 60%;
-            .ingredients-list li, p  { font-size: 0.7em;} @include min-992px { font-size: 1em;}
+            .ingredients-list li, p  { 
+                font-size: 0.7em;
+                @include min-992px { font-size: 1em;}
+            } 
             .recipe-txt { 
                 height: 100%;
                 p {
