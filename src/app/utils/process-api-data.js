@@ -2,6 +2,20 @@
 /* ================================================== */
 /* ALL METHODS USED TO PROCESS INCOMING API DATA
 /* ================================================== */
+// make it all lowercase
+// remove accents, parentheses, ponctuation
+// determine if made of several words
+
+/* const parenthesesRegExp = /[()]/g;
+const endsWithCommaOrPeriodRegex = /\.|,$/i;
+const containsPunctuationRegex = /[.,/#!$%^&*;:{}=\-_`~()]/g;
+const containsApostropheRegex = /'/g;
+const containsWhiteSpace = /\s/;
+const containsAnyAccentRegex = /[èéêëîâàä]/g;
+const eContainsAccentRegex = /[èéêë]/g;
+const iContainsAccentRegex = /[î]/g;
+const containsWhiteSpaceRegex = /\s/; */
+
 
 // standard string processing
 export function checkString(str) {
@@ -10,6 +24,32 @@ export function checkString(str) {
     str = removePunctuation(str);
     return str;
 }
+
+// additional processing before adding to PREFIX TRIE
+// determine if a string is made of several words
+// => replace white space(s) with '-'
+// => replace ' apostrophe(s) with '-' as well
+// => removes all articles and the like :  du/de/la/a/au/ ... (avoid bloating trie)
+// ======> return 2 VERSIONS IN A SINGLE ARRAY : a STRING with hyphens + an array of these words (all to be inserted in trie)
+export function processIfSeveralWords(str){
+    const isSeveralWordsRegex = /[']|\s/g;
+    const isA2charsWord = /(\b(\w{1,3})\b(\s|$))/g;
+    let wordsFromStr = [];
+    // console.log('PROCESSING= ', str);
+
+    if ( isSeveralWordsRegex.test(str) ) {                              // 'mousse au chocolat'
+        
+        let remove2charsWords = str.replace(isA2charsWord,'');          // 'mousse chocolat'
+        let arrFromStr = remove2charsWords.split(isSeveralWordsRegex);  // ['mousse', 'chocolat']
+        // let noApostropheNoSpace = str.replace(/[']|\s/g, '-');          //  'mousse-au-chocolat'
+        // return arrFromStr.concat(noApostropheNoSpace);
+        return arrFromStr;
+    
+    } else {
+        wordsFromStr.push(str); return wordsFromStr;                   // ['mousse', 'chocolat','mousse-au-chocolat' ]
+    }
+}
+
 // STRINGS --------------------------------------------------------------------------------------------------
 
 // replace accented e', 'a', 'i', ç , char with regular char - ex: 'crême' -> 'creme'
@@ -48,6 +88,7 @@ export function removePunctuation(str) {
     let punctuationless = str.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,'');
     return str = punctuationless.replace(/\s{2,}/g,' '); // remove additional spaces added in place of punctation
 }
+
 
 // ARRAYS --------------------------------------------------------------------------------------------------
 // Prevent adding same word ending with/without 's' in ARRAYS: SUGGESTIONS/CATEGORY lists - ex : 'fraise' + 'fraises' => keep only 'fraises'

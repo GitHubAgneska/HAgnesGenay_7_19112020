@@ -25,12 +25,27 @@ export class SearchBar extends HTMLElement {
             </div>`;
 
         const mainInputSearch = this.querySelector('#main-search-input');
+    
         let searchIcon = this.querySelector('#search-addon');
         searchIcon.classList.add('d-inline-block');
         let resetSearchIcon = this.querySelector('#reset-search-icon');
         resetSearchIcon.style.display = 'none'; // default
 
-        resetSearchIcon.addEventListener('click', function(event) { RecipeModule.resetSearch(event); });
+        let advSearchIsActive = () => {
+            const tagsWrapper = document.querySelector('#tagsWrapper');
+            if ( tagsWrapper && tagsWrapper.hasChildNodes() ) { return true; } else { return false; }
+        };
+
+        resetSearchIcon.addEventListener('click', function(event) { 
+            if ( advSearchIsActive() ) {
+                resetInput(event);
+            } else { RecipeModule.resetSearch();}
+        });
+
+        function resetInput(event) {
+            mainInputSearch.value = event.target;
+            return mainInputSearch.value = '';
+        }
 
         // prepare a wrapper for incoming suggestions: it will be empty and non visible until items come in
         const suggestionsWrapperParent = this.querySelector('.form-outline');
@@ -44,16 +59,23 @@ export class SearchBar extends HTMLElement {
         let currentSearchTerm = '';
         let inputFieldTouched = false;
 
-
-
         mainInputSearch.addEventListener('input', function(event){
-            currentSearchTerm = event.target.value;
-
-            // process input as it enters field = init match search
+            currentSearchTerm = event.target.value; // ( currentSearchTerm is actually a letter .. )
+            if ( currentSearchTerm === ' ') { currentSearchTerm = '-'; } // deal with spaces represented in trie with '-' {
             RecipeModule.processCurrentMainSearch(currentSearchTerm);
-
             inputFieldTouched = true;
             handleManualSearchReset();
+        }, false);
+
+        // CASE WHERE USER USES BACKSPACE KEY to delete chars : prevent search to start again
+        mainInputSearch.addEventListener('keydown', function(event){
+            currentSearchTerm = event.target.value;
+            if ( event.key === 'Backspace') {
+                handleManualSearchReset();
+                RecipeModule.removeNoResults();
+                return false; // prevent more search
+            }
+            if ( event.key === 'Enter' ) { RecipeModule.confirmCurrentChars(); } // allow manual searchterm confirmation
         }, false);
 
 
@@ -62,29 +84,20 @@ export class SearchBar extends HTMLElement {
         function handleManualSearchReset(){
             if ( inputFieldTouched && !currentSearchTerm && mainInputSearch == document.activeElement ){
                 console.log('NEW SEARCH PENDING');
-                RecipeModule.resetSearchArray(); // data array
-                RecipeModule.resetSuggestions(); // dom
-                RecipeModule.removeNoResults(); // remove no results message if needed
+                RecipeModule.resetAllFromPreviousSearch();
+                RecipeModule.resetDefaultView();
             }
         }
         
         // case where user confirm searchterm manually instead of choosing a word in suggestions
         // then all current results list for all suggested words are displayed
         // + first word in suggestions is 'sent' to input field
-        searchIcon.addEventListener('click', function(event, currentSearchTerm ){
+        searchIcon.addEventListener('click', function(){
             currentSearchTerm = mainInputSearch.value;
-            // console.log('currentSearchTerm==', currentSearchTerm);
-            if (currentSearchTerm && currentSearchTerm !== null) {
-                RecipeModule.resetSuggestions();
-                RecipeModule.displaySearchResults();
-                // display 1st suggestion by default
-                let firstSuggestion = RecipeModule.retrieveFirstSuggestion();
-                let inputField = document.querySelector('#main-search-input');
-                inputField.value = firstSuggestion;
-                // reset search icon replaces serach icon
-                searchIcon.classList.remove('d-inline-block'); searchIcon.style.display = 'none';
-                resetSearchIcon.style.display = 'inline-block'; // visible
-            }
+            RecipeModule.confirmCurrentChars();
+            // reset search icon replaces serach icon
+            searchIcon.classList.remove('d-inline-block'); searchIcon.style.display = 'none';
+            resetSearchIcon.style.display = 'inline-block'; // visible
         }, false);
     }
 }

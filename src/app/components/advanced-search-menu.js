@@ -100,6 +100,13 @@ export class CollapsingMenu extends HTMLElement{
         menuHeaderClose.addEventListener('click', function(event){ menuOpen(event),{ once: true }; }, false);
         
         function menuOpen(event) {
+
+            // make sure suggestions = reset from last search
+            suggestionsWrapper.style.display = 'none';
+            resetSuggestions();
+            cardBodyList.style.display = 'flex';
+
+        
             menuHeaderClose = event.currentTarget; // element that handles event
             event.stopPropagation();
             
@@ -193,7 +200,7 @@ export class CollapsingMenu extends HTMLElement{
             currentCategoryName = currentCategoryName.slice(11, currentCategoryName.length);
         
             // console.log('currentCategoryName==',currentCategoryName);
-            if (searchTerm.length > 3) {
+            if (searchTerm.length === 3) {
                 processManualInputSearchIntoCurrentList(searchTerm, currentCategoryName);
             }
             inputFieldTouched = true;
@@ -219,6 +226,7 @@ export class CollapsingMenu extends HTMLElement{
         }
 
         function displayCurrentSuggestions(currentSuggestions) {
+            resetSuggestions();  
             // first, hide the whole current list
             cardBodyList.style.display = 'none';
             // suggestions wrapper becomes visible
@@ -235,9 +243,11 @@ export class CollapsingMenu extends HTMLElement{
         }
 
         function resetSuggestions(currentSuggestions) {
+            while (suggestionsWrapper.firstChild) {suggestionsWrapper.removeChild(suggestionsWrapper.firstChild); }
             if (currentSuggestions) { 
-                while( currentSuggestions.length > 0  ) { currentSuggestions.pop(); } // remove arr items
+                while( currentSuggestions.length > 0 ) { currentSuggestions.pop(); } // remove arr items
             } else { return; }
+            
         }
 
         // case where user deletes chars until field = empty or deletes the whole searchterm
@@ -248,7 +258,7 @@ export class CollapsingMenu extends HTMLElement{
                 RecipeModule.removeNoResults(); // remove no results message if needed
                 resetSuggestions(currentSuggestions);// remove dom suggestions
                 // hide suggestions wrapper
-                cardBodySuggestions.style.display = 'none';
+                suggestionsWrapper.style.display = 'none';
                 // if input field empty, show default list elements again
                 cardBodyList.style.display = 'flex';
             }
@@ -257,10 +267,15 @@ export class CollapsingMenu extends HTMLElement{
         // HANDLE TAGS OF ADVANCED SEARCH ==================================================
         let setTagsList = function(tag) { currentTags.push(tag); }; // keep track of tags to prevent displaying the same one more than once
         let getTagsList = function() { return currentTags; }; // AND is used by search method that needs an up-to-date array of tags
+        
         let removeTagFromList = function(tag) {
-            console.log('currenttags==', currentTags, 'type==', typeof(currentTags));
+            
+            let currenttags = getTagsList();
+            console.log('currenttags==', currenttags);
+
             let tagIndex = currentTags.indexOf(tag);
             currentTags.splice(tagIndex, 1);
+            console.log('currenttags AFTER REMOVE==', currentTags, 'type==', typeof(currentTags));
             return currentTags;
         };
 
@@ -291,12 +306,24 @@ export class CollapsingMenu extends HTMLElement{
                 console.log('contains parentheses');
                 removePunctuation(searchTerm);
             }
-            console.log('searchTerm after remove==', searchTerm);
             let tagText = document.createTextNode(searchTerm);
             searchItemTag.appendChild(tagText);
             searchItemTag.appendChild(tagCloseIcon);
             tagCloseIcon.addEventListener('click', function(event) { removeTag(event);}, false);
             return searchItemTag;
+        }
+
+        let noTagsRemaining;
+        // case where all tags have been removed : inform module :
+        // IF there was a main search => reset displaying main search results
+        // ELSE => reset default view
+        function checkNoRemainingTag() {
+            let tagsWrapper = document.querySelector('#tagsWrapper');
+            if (  !tagsWrapper.hasChildNodes()  ) { 
+                // console.log('ALL TAGS REMOVED !');
+                noTagsRemaining = true;
+            }
+            return noTagsRemaining;
         }
 
         // delete tag (via icon)
@@ -311,7 +338,12 @@ export class CollapsingMenu extends HTMLElement{
             // update results list
             removeTagFromList(tagToRemove.textContent);
             currentTags = getTagsList();
-            currentTags.forEach(term => {RecipeModule.processAdvancedSearch(term, currentCategoryName); });
+            currentTags.forEach(term => {RecipeModule.processAdvancedSearch(term, categoryName); });
+            
+            checkNoRemainingTag();
+            if ( noTagsRemaining ) {
+                RecipeModule.handleAdvancedSearchReset();
+            }
         }
     }
 }

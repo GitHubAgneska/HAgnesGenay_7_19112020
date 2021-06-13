@@ -37,6 +37,9 @@ export const RecipeModule = (function() {
     let advancedSearchRecipes = [];
     let advancedSearchResults = [];
 
+    // SET-UP LOCAL STORAGE for all recipes array
+    const myStorage = window.localStorage;
+
     // fetch all recipes
     fetch(localUrl)
     .then(response => {
@@ -91,6 +94,8 @@ export const RecipeModule = (function() {
             // all recipes casted, ordered as coming from api (default)
             recipesList.push(newRecipe);
         });
+        // (will be used every time the page needs to display default view)
+        myStorage.setItem('allRecipes',JSON.stringify(recipesList));
         setResults(recipesList);
         initAdvancedSearchSection();
         setUpAdvancedSearchView(arrayOfCategoryElements); // default == all recipes (= array of arrays [appliancesList, ustensilsList, ingredientsList])
@@ -107,41 +112,26 @@ export const RecipeModule = (function() {
         root.appendChild(recipesListWrapper);
     }
 
-
-    let t0, t1;
     
     // SEARCH FUNCTIONALITY : MAIN SEARCH ==================================================================================================
     // RETRIEVE current search term and call search method
     function processCurrentMainSearch(currentSearchTerm) {
         // console.log(currentSearchTerm);
         if ( currentSearchTerm.length >= 3 ) { // launch search from 3 chars to make suggestions
-
-            // BROWSER - PERF TESTS --------------------
-            t0 = performance.now();
-            // -----------------------------------------
-            console.log('searchterm= ', currentSearchTerm);
             search(recipes, currentSearchTerm); // launch search for term in recipes list
         }
     }
 
-
-
     // STORE results in the module, until display method needs them
-    let setResults = function(results) { 
-        storedResults = results;
-        // BROWSER - PERF TESTS --------------------
-        t1 = performance.now();
-        console.log('FIND SEARCH TERM took', t1 - t0, 'milliseconds');
-        // -----------------------------------------
-    };
-
-
-
+    let setResults = function(results) { storedResults = results; };
     let getResults = function() { return storedResults; };
+    let resetResults = function() { storedResults = []; };
 
     // STORE suggestions in the module, until display method needs them
     let setSuggestions = function(suggestions) { storedSuggestions = suggestions; };
     let getSuggestions = function() { return storedSuggestions; };
+
+    function resetAllFromPreviousSearch() { resetSuggestions(); resetResults(); removeNoResults(); }
 
 
     // HANDLE SUGGESTIONS ---------------
@@ -177,6 +167,16 @@ export const RecipeModule = (function() {
         displaySearchResults();
     }
 
+      // case where user presses 'enter' in search bar 
+    // -> if searchterm is partial => will display all recipes linked to all suggested words ------ TO REVIEW : will do the samr if word is complete..
+    function confirmCurrentChars() {
+        // let suggested = getSuggestedResults();
+        let results = getResults();
+        setResults(results);
+        displaySearchResults(results);
+        resetSuggestions(); // reset suggestions data
+    }
+
     // suggestions list DOM should be reset at each new keystroke
     function resetSuggestions(parent){
         parent = document.querySelector('#main-suggestions');
@@ -203,18 +203,26 @@ export const RecipeModule = (function() {
         window.location.reload();
     }
 
+    function resetDefaultView() {
+        let allrecipes = JSON.parse(myStorage.getItem('allRecipes' || '[]')); // console.log('ALL RECIPES FROM LOCAL STORAGE==', allrecipes);
+        setResults(allrecipes);
+        displaySearchResults(allrecipes);
+    }
+
     // DISPLAY RECIPE LIST BY SEARCH TERM ----------------
     // when an array of results for the search term is ready to be displayed in UI
         // 'ready' means: a suggestion has been selected
         // OR : user presses 'enter' or clicks 'submit' icon
     function displaySearchResults(results) {
-        results = getResults();
-        // store current list for advanced search to search into
-        advancedSearchRecipes = getResults();
         // reset current list of recipes
         let recipesListWrapper = document.querySelector('#recipes-list');
         //reset recipes list wrapper
         while (recipesListWrapper.firstChild) { recipesListWrapper.removeChild(recipesListWrapper.firstChild); }
+
+        // store current list for advanced search to search into
+        advancedSearchRecipes = getResults();
+        results = getResults();
+        if (!results) { results = JSON.parse(myStorage.getItem('allRecipes' || '[]')); }
         // generate recipe elements to display based on new results
         results.forEach(recipe => { generateRecipeCard(recipe); });
         // set categories elements based on new results
@@ -285,29 +293,23 @@ export const RecipeModule = (function() {
             recipeIngr.forEach( item => {
                 let currentIngredient = item.ingredient;
                 currentIngredient = currentIngredient.toLowerCase();
-                checkString(currentIngredient);
-
+                checkString(currentIngredient); // remove ponctuation, accents, make lowercase
                 treatUnits(item); // checkUnitType(item); ---- to review : exceptions !
-                // check doublons before adding
-                checkDoublonsBeforeAddingToArray(ingredientsList,currentIngredient);
+                checkDoublonsBeforeAddingToArray(ingredientsList,currentIngredient);// check doublons before adding
             });
 
             // retrieve category elements : all appliances
             let currentAppliance = recipe.appliance;
             currentAppliance = currentAppliance.toLowerCase();
-            // remove ponctuation, accents, 
             checkString(currentAppliance);
-            // check doublons before adding
             checkDoublonsBeforeAddingToArray(appliancesList,currentAppliance);
 
-    
             // retrieve category elements : all ustensils
             const recipeUst = recipe.ustensils;
             recipeUst.forEach(ust => {
                 let currentUstensil = ust;
                 currentUstensil = currentUstensil.toLowerCase();
                 checkString(currentUstensil);
-                // check doublons before adding
                 checkDoublonsBeforeAddingToArray(ustensilsList,currentUstensil);
             });
         });
@@ -349,6 +351,22 @@ export const RecipeModule = (function() {
             listELement.addEventListener('click', function(event){ selectItemInList(event, categoryName); }, false);
         });
     }
+    // case where all tags have been removed from advanced search :
+    // IF there was a main search => reset displaying main search results
+    // ELSE => reset default view
+    let mainInputSearchActive;
+    function handleAdvancedSearchReset() {
+        const mainInputSearch = document.querySelector('#main-search-input');
+        
+        if ( mainInputSearch.value ) { 
+            mainInputSearchActive = true;
+            processCurrentMainSearch(mainInputSearch.value);
+
+        } else { 
+            mainInputSearchActive = false;
+            resetDefaultView();
+        }
+    }
 
 
     //  ======== !! TO REVIEW : REDEFINITION OF EXISTING METHOD in CollapsingMenu component : 
@@ -371,7 +389,6 @@ export const RecipeModule = (function() {
         advancedSearch(advancedSearchRecipes, searchTerm, currentCategoryName);
         advancedSearchResults = RecipeModule.getResults();
         displaySearchResults(advancedSearchResults);
-
     }
 
     // method used to close a menu if another one is called to open
@@ -389,25 +406,28 @@ export const RecipeModule = (function() {
         });
     }
 
-
-
-
     // PUBLIC PART OF MODULE
     return {
         processCurrentMainSearch: processCurrentMainSearch,
         addSuggestionInList: addSuggestionInList,
+        
         resetSuggestions:resetSuggestions,
         resetSearchArray: resetSearchArray,
         setResults: setResults,
         getResults: getResults,
         setSuggestions: setSuggestions,
+        resetAllFromPreviousSearch:resetAllFromPreviousSearch,
+        resetDefaultView:resetDefaultView,
+        confirmCurrentChars:confirmCurrentChars,
+
         retrieveFirstSuggestion: retrieveFirstSuggestion,
         displaySearchResults: displaySearchResults,
         processAdvancedSearch: processAdvancedSearch,
         checkWhosOpen:checkWhosOpen,
         resetSearch: resetSearch,
         displayNoResults:displayNoResults,
-        removeNoResults:removeNoResults
+        removeNoResults:removeNoResults,
+        handleAdvancedSearchReset:handleAdvancedSearchReset
         };
     
 }());
