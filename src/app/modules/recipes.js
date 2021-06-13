@@ -114,13 +114,12 @@ export const RecipeModule = (function() {
     let storedResults = [];  // local storage of results
     let storedSuggestions = []; // local storage of suggestions
 
-    // STORE results of adv search
     let advancedSearchRecipes = [];
     let advancedSearchResults = [];
     let setAdvancedSearchResults = function(results) { advancedSearchResults = results; };
     let getAdvancedSearchResults = function() { return advancedSearchResults; };
 
-    // STORE results of main search
+    // STORE results in the module, until display method needs them
     let setResults = function(results) { storedResults = results; };
     let resetResults = function() { storedResults = []; };
     let getResults = function() { return storedResults; };
@@ -150,6 +149,7 @@ export const RecipeModule = (function() {
 
     // RETRIEVE current search term and call search method --------
     function processCurrentMainSearch(letter) {
+        t0 = 0; t1 = 0; console.log('resetting t0 /t1');
 
         // console.log('letter===', letter);
         currentSearchTerm += letter;
@@ -184,7 +184,7 @@ export const RecipeModule = (function() {
     
                 searchInTree(currentSearchTerm); // launch search in trie
                 let resultsFromTrie = getTrieResults(); // console.log('RESULTS FROM TRIE==', resultsFromTrie);
-                let suggestionsFromTrie = getTrieSuggestions(); console.log('SUGGESTIONS FROM TRIE==', suggestionsFromTrie);
+                let suggestionsFromTrie = getTrieSuggestions(); // console.log('SUGGESTIONS FROM TRIE==', suggestionsFromTrie);
                 
                 if ( suggestionsFromTrie ) {
                     processTrieSuggestions(suggestionsFromTrie);
@@ -213,13 +213,22 @@ export const RecipeModule = (function() {
                 });
             }
         });
+        // BROWSER - PERF TESTS --------------------
+        t1 = performance.now();
+        // -----------------------------------------
+
         setResults(finalArrOfRecipes); // store results array
-        if ( finalArrOfRecipes.length > 0 ) console.log('RECIPES ARRAY AS RECEIVED BY MODULE====',finalArrOfRecipes );
+
+        if ( finalArrOfRecipes.length > 0 ) {
+            // console.log('RECIPES ARRAY AS RECEIVED BY MODULE====',finalArrOfRecipes );
+            let currentSearchterm = getCurrentSearchterm();
+            console.log('******* FIND MATCHES FOR SEARCH TERM : ', currentSearchterm ,' AND RETRIEVE RESULTS TOOK', t1 - t0, 'milliseconds' ,'\n','----> RESULTS===',finalArrOfRecipes);
+        }
         
         // BROWSER - PERF TESTS --------------------
-        t1 = performance.now(); let current = getCurrentSearchterm();
-        console.log('FIND SEARCH TERM', current ,'TOOK', t1 - t0, 'milliseconds');
-        if ( finalArrOfRecipes.length > 0 ) {console.log('FIND SEARCH TERM : ', current ,' AND RETRIEVE RESULTS TOOK', t1 - t0, 'milliseconds'); }
+        // t1 = performance.now(); let current = getCurrentSearchterm();
+        // console.log('FIND SEARCH TERM', current ,'TOOK', t1 - t0, 'milliseconds');
+        // if ( finalArrOfRecipes.length > 0 ) {console.log('FIND SEARCH TERM : ', current ,' AND RETRIEVE RESULTS TOOK', t1 - t0, 'milliseconds'); }
         // -----------------------------------------
     }
 
@@ -305,7 +314,7 @@ export const RecipeModule = (function() {
         let suggested = getSuggestedResults();
         let results = getResults();
         if ( results.length === 0 ) {
-            setResults(suggested); 
+            setResults(suggested);
             displaySearchResults(suggested);
         } else { 
             setResults(results);
@@ -344,6 +353,7 @@ export const RecipeModule = (function() {
     }
 
     // case where results from adv search exist, and user resets main search input field
+ 
 
     // DISPLAY RECIPE LIST BY SEARCH TERM ----------------
     // when an array of results for the search term is ready to be displayed in UI
@@ -383,7 +393,7 @@ export const RecipeModule = (function() {
         if (root.contains(noResultsBlock)) { root.removeChild(noResultsBlock);}
     }
 
-    function resetAllForNewSearch() {  // ---- TO REVIEW : doublon of resetAllFromPrevSearch
+    function resetAllForNewSearch() {
         resetResults();
         resetSuggestions();
         resetSuggestionsBlock();
