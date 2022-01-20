@@ -5,17 +5,17 @@ export class CardTemplate extends HTMLElement {
     constructor(recipe) {
         super();
 
-        this.setAttribute('class', 'col');
+        this.setAttribute('class', 'col col-xl-4');
         this.innerHTML = 
             `
-            <div class="card recipe-card col m-0 p-0">
+            <div class="card recipe-card col col m-0 p-0">
                 <img src="" class="card-img-top" alt="">
                 <div class="card-body">
                     <div class="card-header-recipe row">
                         <h5 class="card-title col-10 m-0 p-0">${recipe.name}</h5>
-                        <div class="card-time col-2 row m-0 p-0">
-                            <i class="far fa-clock col m-0 p-0"></i>
-                            <h5 class="time col m-0 p-0">${recipe.time}min</h5>
+                        <div class="card-time col-2 m-0 p-0">
+                            <i class="far fa-clock m-0 p-0"></i>
+                            <h5 class="time m-0 p-0">${recipe.time}min</h5>
                         </div>
                     </div>
                     <div class="recipe-description row">
@@ -36,11 +36,15 @@ export class CardTemplate extends HTMLElement {
                 let newListItem = document.createElement('li');
                 let newListItemContent = document.createTextNode(ingredient.ingredient);
                 if (ingredient.quantity) { newListItemContent.textContent+= ': ' + ingredient.quantity; }
-                if (ingredient.unit) { newListItemContent.textContent+= ' ' + ingredient.unit; }
+                if (ingredient.unit) {
+                    if (ingredient.unit === 'g' || ingredient.unit === 'ml') { // skip space if unit is 'grammes' / 'g' or ml
+                        newListItemContent.textContent+= '' + ingredient.unit;
+                    } else {
+                        newListItemContent.textContent+= ' ' + ingredient.unit; }
+                    }
 
                 newListItem.appendChild(newListItemContent);
                 ingredientsList.appendChild(newListItem);
-
             });
     }
 }

@@ -1,0 +1,37 @@
+
+.form-outline {
+    position: relative; // for suggestions wrapper abs pos
+    height: 40px;
+    .icon-search { height:100%;}
+    @include border-radius(5px);
+}
+.form-outline, .form-outline input {
+    background-color: #E7E7E7;
+    border:transparent !important;
+}
+.form-outline input::placeholder {
+    text-overflow: ellipsis;
+    @include max-600px {
+        font-size: 0.7em;}
+    }
+
+
+// suggestions wrapper
+.main-suggestions {
+    background-color: lightgrey;
+    color: white;
+    border-bottom: 1px solid white;
+    position: absolute; z-index:6;top: 40px;
+    width: 500px;
+    p { 
+        padding:2%;
+        &:hover,
+        &:focus { background-color: pink;}
+    }
+}
+// no results message
+.no-results-message {
+    border: 1px solid orange; @include border-radius(5px);
+    color: orange;
+    padding:1%; margin:1%;
+}

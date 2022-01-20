@@ -15,7 +15,6 @@
 ### Install
 ```bash
 $ git clone https://github.com/GitHubAgneska/HAgnesGenay_7_19112020.git
-
 $ npm install
 $ npm run start
 ```

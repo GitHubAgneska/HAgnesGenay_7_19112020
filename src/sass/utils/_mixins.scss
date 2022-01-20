@@ -8,6 +8,81 @@
 /* ======================================== */
 $breakpoints: (xs-mobile: 375px, mobile: 600px, tablet: 768px, laptop: 992px, desktop: 1200px );
 
+/* == up to 375  */
+@mixin max-375px {
+    @media screen and (max-width: map-get($breakpoints, xs-mobile )) {
+        @content;
+        @include transition(all, 1s, ease-in-out);  // --------- TO REVIEW : replace 'all' with specific elements
+    }
+}
+/* == from 375  */
+@mixin min-375px {
+    @media screen and (min-width: map-get($breakpoints, xs-mobile )) {
+        @content;
+        @include transition(all, 1s, ease-in-out);
+    }
+}
+/* == up to 600  */
+@mixin max-600px {
+    @media screen and (max-width: map-get($breakpoints, mobile )) {
+        @content;
+        @include transition(all, 1s, ease-in-out);
+    }
+}
+/* == from 600  */
+@mixin min-600px {
+    @media screen and (min-width: map-get($breakpoints, mobile )) {
+        @content;
+        @include transition(all, 1s, ease-in-out);
+    }
+}
+/* == up to 768  */
+@mixin max-768px {
+    @media screen and (max-width: map-get($breakpoints, tablet )) {
+        @content;
+        @include transition(all, 1s, ease-in-out);
+    }
+}
+/* == from 768  */
+@mixin min-768px {
+    @media screen and (min-width: map-get($breakpoints, tablet )) {
+        @content;
+        @include transition(all, 1s, ease-in-out);
+    }
+}
+/* == up to 992  */
+@mixin max-992px {
+    @media screen and (max-width: map-get($breakpoints, laptop )) {
+        @content;
+        @include transition(all, 1s, ease-in-out);
+    }
+}
+/* == from 992  */
+@mixin min-992px {
+    @media screen and (min-width: map-get($breakpoints, laptop )) {
+        @content;
+        @include transition(all, 1s, ease-in-out);
+    }
+}
+
+/* == up to 1200  */
+@mixin max-1200px {
+    @media screen and (max-width: map-get($breakpoints, desktop )) {
+        @content;
+        @include transition(all, 1s, ease-in-out);
+    }
+}
+
+/* == from 1200  */
+@mixin min-1200px {
+    @media screen and (min-width: map-get($breakpoints, desktop )) {
+        @content;
+        @include transition(all, 1s, ease-in-out);
+    }
+}
+
+
+
 
 /* ======================================== */
 /* COMMON ELEMENTS */
@@ -38,3 +113,22 @@ $breakpoints: (xs-mobile: 375px, mobile: 600px, tablet: 768px, laptop: 992px, de
     display: flex;
     flex-flow: $dir $wraptype;
 }
+
+/* ======================================== */
+/* MARGIN / PADDING */
+/* ======================================== */
+@mixin m0-p0{
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ======================================== */
+/* BORDER-RADIUS */
+/* ======================================== */
+
+@mixin border-radius($pixel...) {
+    border-radius: $pixel;
+}
+
+
+
