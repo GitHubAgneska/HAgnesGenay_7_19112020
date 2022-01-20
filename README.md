@@ -1,5 +1,7 @@
 ## LES PETITS PLATS: search engine for recipes
-## https://githubagneska.github.io/js-prefix-tree-search/
+## deploy using trie search => https://githubagneska.github.io/js-prefix-tree-search/
+## deploy using linear search => https://githubagneska.github.io/linear-search/
+
 ---
 ### Stack
 - Vanilla Javascript
