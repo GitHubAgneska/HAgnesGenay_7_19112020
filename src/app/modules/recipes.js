@@ -152,7 +152,7 @@ export const RecipeModule = (function() {
         t0 = 0; t1 = 0; console.log('resetting t0 /t1');
 
         // console.log('letter===', letter);
-        currentSearchTerm += letter;
+        currentSearchTerm += letter.toLowerCase();
         resetAllFromPreviousSearch();
         
         // check if search in categories was done before main search
